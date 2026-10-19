@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>軽音部タイムスケジュール</title>
+
+  <style>
+    /* ============================
+       🌤️ 青空フェス背景
+       ============================ */
+    body {
+      background: linear-gradient(to bottom, #74c9ff, #dff6ff);
+      color: #003366;
+      font-family: 'Hiragino Sans', sans-serif;
+      overflow-x: hidden;
+      margin: 0;
+      padding: 0;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 200%;
+      height: 100%;
+      background: url('https://i.imgur.com/8KpZQ0R.png') repeat-x;
+      opacity: 0.25;
+      animation: clouds 60s linear infinite;
+      pointer-events: none;
+    }
+
+    @keyframes clouds {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+
+    /* ============================
+       🌞 タイトル
+       ============================ */
+    h1 {
+      text-align: center;
+      font-size: 3.5em;
+      color: #007bff;
+      text-shadow:
+        0 0 10px #ffffff,
+        0 0 20px #aee6ff,
+        0 0 40px #ffffff;
+      letter-spacing: 3px;
+      font-family: 'Impact', sans-serif;
+      margin-bottom: 60px;
+      margin-top: 40px;
+      animation: shine 3s infinite;
+    }
+
+    @keyframes shine {
+      0% { text-shadow: 0 0 10px #fff; }
+      50% { text-shadow: 0 0 25px #fffa9e; }
+      100% { text-shadow: 0 0 10px #fff; }
+    }
+
+    /* ============================
+       🎪 説明文
+       ============================ */
+    .intro {
+      width: 90%;
+      margin: 0 auto 40px;
+      padding: 30px;
+      font-size: 1.2em;
+      line-height: 1.8;
+      color: #003366;
+      background: rgba(255,255,255,0.85);
+      border-left: 6px solid #ffdd55;
+      border-right: 6px solid #ff7b7b;
+      border-radius: 12px;
+      box-shadow: 0 0 12px rgba(0, 120, 200, 0.3);
+      box-sizing: border-box;
+    }
+
+    /* ============================
+       🎤 スケジュール枠
+       ============================ */
+    .schedule {
+      display: flex;
+      flex-direction: column;
+      gap: 60px;
+      padding: 0 12px;
+    }
+
+    .slot {
+      width: 100%;
+      padding: 35px 25px;
+      background: rgba(255,255,255,0.9);
+      border: 3px solid #7ecbff;
+      border-radius: 18px;
+      box-shadow: 0 6px 15px rgba(0, 120, 200, 0.25);
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+      position: relative;
+    }
+
+    .slot.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .slot::before {
+      content: "";
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60%;
+      height: 12px;
+      background: linear-gradient(90deg, #ffdd55, #ff7b7b);
+      border-radius: 6px;
+    }
+
+    .slot h2 {
+      margin: 0 0 10px;
+      font-size: 2em;
+      color: #0055aa;
+    }
+
+    .band-name {
+      font-size: 2.6em;
+      font-weight: bold;
+      color: #0055aa;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.15);
+      margin-bottom: 10px;
+    }
+
+    .slot li {
+      font-size: 1.4em;
+      color: #004466;
+      margin-bottom: 6px;
+    }
+
+    /* ============================
+       📱 スマホ専用：画像最適化＋間隔拡大
+       ============================ */
+    @media (max-width: 600px) {
+
+      .schedule {
+        gap: 90px; /* コンテンツ間隔を広げる */
+      }
+
+      .slot {
+        padding: 45px 28px; /* 枠内の余白を広げる */
+      }
+
+      .slot img {
+        width: 100%;
+        height: auto;          /* 縦長写真をそのまま表示 */
+        object-fit: contain;   /* 人物が切れない */
+        background-color: rgba(255,255,255,0.9);
+        border-radius: 12px;
+        border: 3px solid #fff;
+        margin-top: 20px;
+        margin-bottom: 25px;   /* 画像と次の要素の間隔 */
+        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      }
+
+      .slot h2 {
+        margin-bottom: 20px; /* 時間と曲名の間隔 */
+      }
+
+      .slot ul {
+        margin-top: 15px;
+      }
+    }
+
+    /* PC用画像（そのまま） */
+    .slot img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 12px;
+      border: 3px solid #fff;
+      margin-top: 15px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+
+    /* ============================
+       🔆 TOPボタン
+       ============================ */
+    #backToTop {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      padding: 12px 20px;
+      font-size: 1em;
+      background-color: #ffdd55;
+      color: #333;
+      border: none;
+      border-radius: 50px;
+      box-shadow: 0 0 15px #ffe98a;
+      cursor: pointer;
+      display: none;
+      z-index: 1000;
+      transition: opacity 0.3s ease;
+    }
+
+    #backToTop:hover {
+      background-color: #ffe98a;
+      box-shadow: 0 0 20px #fff6a0;
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <h1>KRC軽音部タイムスケジュール</h1>
+
+  <div class="intro">
+      <p>今年の軽音部ライブは、来てくれた人も巻き込んで最高のライブを作り上げます</p>
+      <p>知っている曲、知らない曲問わず会場全員で一緒に音楽を楽しみましょう！</p>
+      <p>場所：5号館 522教室</p>
+      <p>日時：10月26日 12:00~14:00</p>
+      <p>軽音部一同お待ちしております。</p>
+      <p>※時間はあくまで想定です。前後する可能性があります。</p>
+  </div>
+
+  <div class="schedule">
+    <div class="slot">
+      <h2>12:00 - 12:10</h2>
+      <p class="band-name">ツインベース</p>
+      <ul>
+        <li>曲1 - ベースセッション</li>
+        <li>曲2 - ソロアコギ</li>
+      </ul>
+      <img src="gazou/IMG_9091.jpg" alt="バンドAの写真">
+    </div>
+
+    <div class="slot">
+      <h2>12:15 - 12:20</h2>
+      <p class="band-name">がほうじん</p>
+      <ul>
+        <li>曲1 - 我逢人</li>
+      </ul>
+      <img src="gazou/IMG_0197.jpeg" alt="バンドBの写真">
+    </div>
+
+    <div class="slot">
+      <h2>12:25 - 12:30</h2>
+      <p class="band-name">Kokuri Gnu(OB)</p>
+      <ul>
+        <li>曲1 - Teenager Forever </li>
+        <li>曲1 - ユーモア </li>
+      </ul>
+      <img src="gazou/82B6219D-95CA-4204-A2F5-603C694D6EF2.jpg" alt="バンドCの写真">
+    </div>
+
+    <div class="slot">
+      <h2>12:35 - 12:40</h2>
+      <p class="band-name">欲望に満ちた青年団</p>
+      <ul>
+        <li>曲1 - 欲望に満ちた青年団</li>
+      </ul>
+      <img src="print/img_9070_720.jpg" alt="バンドDの写真">
+    </div>
+
+    <div class="slot">
+      <h2>12:50 - 12:55</h2>
+      <p class="band-name">おやすみ泣き声さよなら歌姫</p>
+      <ul>
+        <li>曲1 - おやすみ泣き声さよなら歌姫</li>
+      </ul>
+      <img src="gazou/IMG_0207.jpg" alt="バンドEの写真">
+    </div>
+
+    <div class="slot">
+      <h2>13:00 - 13:20</h2>
+      <p class="band-name">しんどいねこ</p>
+      <ul>
+        <li>曲1 - Fly Again</li>
+        <li>曲2 - お気に召すまま</li>
+        <li>曲3 - 老人と海</li>
+        <li>曲4 - 飛行艇</li>
+      </ul>
+      <img src="print/img_9040.jpg" alt="バンドFの写真">
+    </div>
+  </div>
+
+  <div class="slot">
+      <h2>13:25 - 13:30</h2>
+      <p class="band-name">惑星ループ</p>
+      <ul>
+        <li>曲1 - 惑星ループ</li>
+      </ul>
+      <img src="print/img_9061_720.jpg" alt="バンドGの写真">
+    </div>
+
+    <div class="slot">
+      <h2>13:35 - 13:45</h2>
+      <p class="band-name">エルレ</p>
+      <ul>
+        <li>曲1 - The Autumn Song</li>
+        <li>曲2 - ？？？</li>
+      </ul>
+      <img src="print/img_9061_720.jpg" alt="バンドHの写真">
+    </div>
+
+    <div class="slot">
+      <h2>13:50 - 13:55</h2>
+      <p class="band-name">ハッピーエンド</p>
+      <ul>
+        <li>曲1 - ハッピーエンド</li>
+      </ul>
+      <img src="print/img_9061_720.jpg" alt="バンドIの写真">
+    </div>
+
+    <div class="slot">
+      <h2>14:40 - 14:45</h2>
+      <p class="band-name">怪物(OB)</p>
+      <ul>
+        <li>曲1 - 怪物</li>
+      </ul>
+      <img src="gazou/IMG_9040.jpg" alt="バンドJの写真">
+    </div>
+
+  <button id="backToTop">↑ TOP</button>
+
+  <script>
+    /* スクロールでふわっと表示 */
+    document.addEventListener("DOMContentLoaded", function () {
+      const slots = document.querySelectorAll(".slot");
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("visible");
+          }
+        });
+      }, {
+        threshold: 0.2
+      });
+
+      slots.forEach((slot) => {
+        observer.observe(slot);
+      });
+    });
+
+    /* TOPボタン表示 */
+    const backToTopBtn = document.getElementById('backToTop');
+
+    window.addEventListener('scroll', () => {
+      if (window.scrollY + window.innerHeight >= document.body.scrollHeight - 100) {
+        backToTopBtn.style.display = 'block';
+      } else {
+        backToTopBtn.style.display = 'none';
+      }
+    });
+
+    backToTopBtn.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  </script>
+
+</body>
+</html>
